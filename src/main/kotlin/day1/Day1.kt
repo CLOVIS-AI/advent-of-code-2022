@@ -22,7 +22,9 @@ fun main() {
 	val result = inputLines()
 		.accumulateElves()
 		.map { it.sumOf { it.toInt() } }
-		.max()
+		.sortedDescending()
+		.take(3)
+		.sum()
 
 	println(result)
 }
