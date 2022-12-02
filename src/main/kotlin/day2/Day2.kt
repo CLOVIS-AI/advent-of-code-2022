@@ -3,7 +3,7 @@ package day2
 import day1.inputLines
 import day2.Outcome.*
 
-private data class PLay(
+private data class Play(
 	val player1: Int,
 	val player2: Int,
 ) {
@@ -20,7 +20,11 @@ private data class PLay(
 		Draw -> 3
 	}
 
-	override fun toString() = "($player1, $player2)"
+	companion object {
+		fun fromExpected(player1: Int, expected: Outcome) = listOf(0, 1, 2)
+			.map { Play(player1, it) }
+			.first { it.wins == expected }
+	}
 }
 
 private enum class Outcome {
@@ -29,10 +33,17 @@ private enum class Outcome {
 	Draw,
 }
 
-private fun convert(text: String) = when (text) {
+private fun convertPlay(text: String) = when (text) {
 	"A", "X" -> 0
 	"B", "Y" -> 1
 	"C", "Z" -> 2
+	else -> error("Unknown letter: $text")
+}
+
+private fun convertOutcome(text: String) = when (text) {
+	"X" -> Loss
+	"Y" -> Draw
+	"Z" -> Win
 	else -> error("Unknown letter: $text")
 }
 
@@ -40,11 +51,11 @@ fun main() {
 	val result = inputLines()
 		.map {
 			val (first, second) = it.split(" ")
-			PLay(convert(first), convert(second))
+			Play.fromExpected(convertPlay(first), convertOutcome(second))
 		}
 		.onEach { println("$it, result: ${it.wins}, score: ${it.score}") }
 		.map { it.score }
 		.sum()
 
-	println("TOtal score: $result")
+	println("Total score: $result")
 }
