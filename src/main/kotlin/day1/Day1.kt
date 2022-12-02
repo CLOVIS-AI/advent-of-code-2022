@@ -1,6 +1,6 @@
 package day1
 
-private fun inputLines() = sequence {
+fun inputLines() = sequence {
 	while (true) {
 		yield(readlnOrNull() ?: break)
 	}
