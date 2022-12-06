@@ -12,9 +12,11 @@ private class Dock(
 	private val _piles = ArrayList(piles.map { ArrayList(it) })
 	val piles: List<Pile> get() = _piles
 
-	fun move(from: Int, to: Int) {
-		println("TRACE: $from -> $to")
-		_piles[to].add(_piles[from].removeLast()!!)
+	fun move(n: Int, from: Int, to: Int) {
+		println("TRACE: $n boxes $from -> $to")
+		val moved = List(n) { _piles[from].removeLast() }
+			.asReversed()
+		_piles[to].addAll(moved)
 	}
 
 	fun topOfEachPile() = piles
@@ -68,9 +70,7 @@ fun main() {
 			val (n, from, to) = it.split(" ")
 				.mapNotNull { it.toIntOrNull() }
 
-			repeat(n) {
-				dock.move(from - 1, to - 1)
-			}
+			dock.move(n, from - 1, to - 1)
 		}
 
 	println("Top of each pile: ${dock.topOfEachPile()}")
