@@ -6,8 +6,20 @@ private typealias Cargo = Char
 private typealias Pile = List<Cargo>
 
 private class Dock(
-	val piles: List<Pile>,
+	piles: List<List<Cargo>>,
 ) {
+
+	private val _piles = ArrayList(piles.map { ArrayList(it) })
+	val piles: List<Pile> get() = _piles
+
+	fun move(from: Int, to: Int) {
+		println("TRACE: $from -> $to")
+		_piles[to].add(_piles[from].removeLast()!!)
+	}
+
+	fun topOfEachPile() = piles
+		.map { it.lastOrNull() ?: " " }
+		.joinToString(separator = "")
 
 	override fun toString() = buildString {
 		appendLine("Dock")
@@ -51,5 +63,15 @@ fun main() {
 	println("Initial situation: $dock")
 
 	inputLines()
-		.forEach { println(it) }
+		.forEach {
+			println("INFO: $it")
+			val (n, from, to) = it.split(" ")
+				.mapNotNull { it.toIntOrNull() }
+
+			repeat(n) {
+				dock.move(from - 1, to - 1)
+			}
+		}
+
+	println("Top of each pile: ${dock.topOfEachPile()}")
 }
