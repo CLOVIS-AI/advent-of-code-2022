@@ -21,6 +21,15 @@ dependencies {
     testImplementation(kotlin("test"))
 }
 
+kotlin {
+    sourceSets.main {
+        kotlin.srcDir("build/generated/ksp/main/kotlin")
+    }
+    sourceSets.test {
+        kotlin.srcDir("build/generated/ksp/test/kotlin")
+    }
+}
+
 tasks.test {
     useJUnitPlatform()
 }
