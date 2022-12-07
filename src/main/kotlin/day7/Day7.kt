@@ -1,11 +1,18 @@
 package day7
 
+import arrow.optics.optics
 import day1.inputLines
 
-private sealed class File {
+@optics
+sealed class File {
 	abstract val size: Int
 
-	data class Regular(override val size: Int) : File()
+	@optics
+	data class Regular(override val size: Int) : File() {
+		companion object
+	}
+
+	@optics
 	data class Directory(val children: Map<String, File> = emptyMap()) : File() {
 
 		override val size by lazy { children.values.sumOf { it.size } }
@@ -18,7 +25,11 @@ private sealed class File {
 					.plus(path.drop(1), file)
 			}
 		}
+
+		companion object
 	}
+
+	companion object
 }
 
 private fun Sequence<String>.repl(): File {
