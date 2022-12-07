@@ -7,8 +7,41 @@ import day1.inputLines
 sealed class File {
 	abstract val size: Int
 
+	abstract fun <T> fold(
+		initial: T,
+		onRegular: (acc: T, it: Regular) -> T,
+		onDirectory: (acc: T, it: Directory) -> T,
+	): T
+
+	fun <T> fold(
+		initial: T,
+		transform: (acc: T, it: File) -> T,
+	): T = fold(
+		initial,
+		onRegular = transform,
+		onDirectory = transform,
+	)
+
+	fun filter(predicate: (File) -> Boolean): File = fold(
+		this,
+		onRegular = { acc, it -> it },
+		onDirectory = { acc, it -> if (predicate(it)) it else acc }
+	)
+
+	abstract fun toString(indent: Int = 0): String
+
 	@optics
 	data class Regular(override val size: Int) : File() {
+
+		override fun <T> fold(
+			initial: T,
+			onRegular: (acc: T, it: Regular) -> T,
+			onDirectory: (acc: T, it: Directory) -> T,
+		): T = onRegular(initial, this)
+
+		override fun toString(indent: Int) = "$size"
+		override fun toString() = toString(indent = 1)
+
 		companion object
 	}
 
@@ -25,6 +58,34 @@ sealed class File {
 					.plus(path.drop(1), file)
 			}
 		}
+
+		override fun <T> fold(
+			initial: T,
+			onRegular: (acc: T, it: Regular) -> T,
+			onDirectory: (acc: T, it: Directory) -> T
+		): T {
+			val folded = children
+				.values
+				.fold(initial) { acc, it ->
+					it.fold(acc, onRegular, onDirectory)
+				}
+
+			return onDirectory(folded, this)
+		}
+
+		override fun toString(indent: Int) = buildString {
+			appendLine()
+
+			val spacing = "  ".repeat(indent)
+			for ((name, child) in children) {
+				append(spacing)
+				append(name)
+				append(": ")
+				appendLine(child.toString(indent + 1))
+			}
+		}
+
+		override fun toString() = toString(indent = 1)
 
 		companion object
 	}
@@ -58,6 +119,8 @@ private fun Sequence<String>.repl(): File {
 				root = root.plus(path + name, File.Regular(size))
 			}
 		}
+
+		println("TRACE: File: $root")
 	}
 
 	return root
@@ -67,6 +130,8 @@ fun main() {
 	val result = inputLines()
 		.onEach { println("INFO:  $it") }
 		.repl()
+		.also { println("Result: $it") }
+		.filter { it.size <= 100_000 }
 
-	println("Total size: ${result.size}")
+	println("Total size: $result")
 }
